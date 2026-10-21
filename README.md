@@ -13,19 +13,19 @@ Web3 hackathons, open-source DAOs, and developer platforms constantly struggle w
 * **Autonomous Web Scaping & Auditing:** Uses GenLayer's `gl.nondet.web.render` to inspect live GitHub repositories or deployed web pages.
 * **Multi-Validator Consensus:** Evaluates submissions using `gl.eq_principle.strict_eq` across independent AI validator models (Mistral, Sonnet, Gemini).
 * **Duplicate Prevention:** Built-in validation checks ensure a single `bounty_id` cannot be audited or submitted twice.
-* **Live Web3 Frontend:** Built with `genlayer-js` to execute real on-chain `writeContract` and `readContract` transactions with full execution lock states.
+* **Interactive Web3 Frontend:** Built with `genlayer-js` featuring live GenLayer wallet connection/disconnection states, tabbed navigation, and real-time on-chain querying.
 
 ---
 
 ## 🛠️ Smart Contract Architecture (`bounty_guard.py`)
 The intelligent contract manages state across three primary public functions:
-1. `verify_delivery(bounty_id, deliverable_url, acceptance_criteria)`: Scrapes the live URL, runs AI consensus, checks for duplicates, and writes the `APPROVED` or `REJECTED` status on-chain.
+1. `verify_delivery(bounty_id, deliverable_url, acceptance_criteria)`: Scrapes the live URL, runs AI consensus, checks for duplicate IDs, and writes the `APPROVED` or `REJECTED` status on-chain.
 2. `get_bounty_status(bounty_id)`: Public view function to check approval status.
 3. `get_bounty_feedback(bounty_id)`: Public view function to retrieve validator justification.
 
 ---
 
-## 🧪 GenStudio Testing Examples
+## 🧪 GenStudio Testings
 
 You can test both consensus pathways directly inside GenStudio using these precise examples:
 
