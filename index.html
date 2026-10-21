@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BountyGuard: Autonomous Deliverable Verifier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-6">
+    <div class="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
+        <h1 class="text-3xl font-bold mb-2 text-cyan-400">BountyGuard DApp</h1>
+        <p class="text-sm text-slate-400 mb-6">Autonomous bounty verification powered by GenLayer consensus.</p>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Bounty ID</label>
+                <input id="bounty-id" type="text" value="bounty_001" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Deliverable URL (GitHub / Demo)</label>
+                <input id="deliverable-url" type="text" value="https://example.com" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Acceptance Criteria</label>
+                <textarea id="criteria" rows="3" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500">The page must state that it is for use in illustrative examples in documents.</textarea>
+            </div>
+            
+            <button id="bounty-btn" onclick="runBountyAudit()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-cyan-900/50 cursor-pointer text-base">
+                Verify Bounty Delivery
+            </button>
+        </div>
+
+        <div id="audit-report" class="mt-6 p-5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 min-h-[150px] flex flex-col justify-center overflow-x-auto break-all">
+            Ready for execution. Enter deliverable details above and click verify.
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient, createAccount } from "https://esm.sh/genlayer-js";
+        import { studionet } from "https://esm.sh/genlayer-js/chains";
+
+        const account = createAccount();
+        const client = createClient({
+            chain: studionet,
+            account: account,
+        });
+
+    
+        const CONTRACT_ADDRESS = "0xA7e39FEe053d0Ea436cf8aC3fefbC8b681640f0e";
+
+        window.runBountyAudit = async function() {
+            const bountyId = document.getElementById("bounty-id").value;
+            const deliverableUrl = document.getElementById("deliverable-url").value;
+            const criteria = document.getElementById("criteria").value;
+            const reportBox = document.getElementById("audit-report");
+            const btn = document.getElementById("bounty-btn");
+
+            btn.disabled = true;
+            btn.classList.add("opacity-50", "cursor-not-allowed");
+            btn.innerText = "⏳ Running Validator Consensus...";
+
+            reportBox.innerHTML = "⏳ Submitting delivery data to GenLayer validators...";
+
+            try {
+                const txHash = await client.writeContract({
+                    address: CONTRACT_ADDRESS,
+                    functionName: "verify_delivery",
+                    args: [bountyId, deliverableUrl, criteria],
+                });
+
+                reportBox.innerHTML = `⏳ Transaction submitted (${txHash.slice(0, 10)}...). Waiting for consensus finalization...`;
+
+                await new Promise(resolve => setTimeout(resolve, 5000));
+
+                const status = await client.readContract({
+                    address: CONTRACT_ADDRESS,
+                    functionName: "get_bounty_status",
+                    args: [bountyId],
+                });
+
+                const feedback = await client.readContract({
+                    address: CONTRACT_ADDRESS,
+                    functionName: "get_bounty_feedback",
+                    args: [bountyId],
+                });
+
+                reportBox.innerHTML = `
+                    <div style="color: #00ffcc; font-weight: bold; margin-bottom: 8px; font-size: 13px;">✓ ACCEPTED Across GenLayer Validator Set</div>
+                    <div style="margin-bottom: 4px;"><strong>Bounty ID:</strong> ${bountyId}</div>
+                    <div style="margin-bottom: 4px;"><strong>Deliverable:</strong> ${deliverableUrl}</div>
+                    <div style="margin-bottom: 4px;"><strong>Audit Status:</strong> <span style="color: ${status === 'APPROVED' ? '#34d399' : '#f87171'}; font-weight: bold;">${status}</span></div>
+                    <div style="margin-bottom: 6px;"><strong>Feedback:</strong> ${feedback}</div>
+                    <div style="font-size: 11px; color: #94a3b8; word-break: break-all; margin-top: 6px; border-top: 1px solid #1e293b; padding-top: 6px;"><strong>Tx Hash:</strong> ${txHash}</div>
+                `;
+            } catch (error) {
+                reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${error.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove("opacity-50", "cursor-not-allowed");
+                btn.innerText = "Verify Bounty Delivery";
+            }
+        };
+    </script>
+</body>
+</html>
