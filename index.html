@@ -35,17 +35,18 @@
         <div class="max-w-2xl w-full bg-slate-900/80 border border-slate-800/80 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
             
             <!-- Navigation Tabs -->
-            <div class="flex border-b border-slate-800 mb-6 space-x-2">
-                <button onclick="switchTab('create')" id="tab-create" class="pb-3 px-3 font-semibold text-xs border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all">1. Create Bounty</button>
-                <button onclick="switchTab('submit')" id="tab-submit" class="pb-3 px-3 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all">2. Submit Delivery</button>
-                <button onclick="switchTab('payout')" id="tab-payout" class="pb-3 px-3 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all">3. Release Payout</button>
+            <div class="flex border-b border-slate-800 mb-6 space-x-1 overflow-x-auto">
+                <button onclick="switchTab('create')" id="tab-create" class="pb-3 px-2.5 font-semibold text-xs border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all whitespace-nowrap">1. Create</button>
+                <button onclick="switchTab('submit')" id="tab-submit" class="pb-3 px-2.5 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all whitespace-nowrap">2. Submit</button>
+                <button onclick="switchTab('query')" id="tab-query" class="pb-3 px-2.5 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all whitespace-nowrap">3. Query Status</button>
+                <button onclick="switchTab('payout')" id="tab-payout" class="pb-3 px-2.5 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all whitespace-nowrap">4. Release Payout</button>
             </div>
 
-            <!-- Tab 1: Create Bounty (Sponsor Role) -->
+            <!-- Tab 1: Create Bounty -->
             <div id="view-create" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
-                    <input id="create-id" type="text" value="bounty_002" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                    <input id="create-id" type="text" value="bounty_taskguard_03" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Sponsor Handle / Address</label>
@@ -59,16 +60,16 @@
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Reward Amount (Tokens)</label>
                     <input id="create-reward" type="number" value="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
-                <button onclick="createBounty()" id="btn-create" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-cyan-900/50 cursor-pointer text-base">
+                <button onclick="createBounty()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-cyan-900/50 cursor-pointer text-base">
                     Create Sponsor Bounty
                 </button>
             </div>
 
-            <!-- Tab 2: Submit Delivery (Worker Role) -->
+            <!-- Tab 2: Submit Delivery -->
             <div id="view-submit" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
-                    <input id="submit-id" type="text" value="bounty_002" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                    <input id="submit-id" type="text" value="bounty_taskguard_03" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Worker Handle / Address</label>
@@ -78,29 +79,35 @@
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Deliverable URL (GitHub / Demo)</label>
                     <input id="submit-url" type="text" value="https://example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
-                <button onclick="submitDelivery()" id="btn-submit" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-cyan-900/50 cursor-pointer text-base">
+                <button onclick="submitDelivery()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-cyan-900/50 cursor-pointer text-base">
                     Submit & Verify Delivery via AI Consensus
                 </button>
             </div>
 
-            <!-- Tab 3: Release Payout & Lookup -->
+            <!-- Tab 3: Query Status -->
+            <div id="view-query" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID to Check</label>
+                    <input id="query-id" type="text" value="bounty_taskguard_03" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+                <button onclick="lookupBounty()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3.5 rounded-xl transition-all cursor-pointer text-base border border-slate-700 shadow-lg">
+                    Query Live On-Chain Status
+                </button>
+            </div>
+
+            <!-- Tab 4: Release Payout -->
             <div id="view-payout" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
-                    <input id="payout-id" type="text" value="bounty_002" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                    <input id="payout-id" type="text" value="bounty_taskguard_03" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Caller Sponsor Handle</label>
                     <input id="payout-caller" type="text" value="SponsorDAO" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
-                <div class="flex gap-3">
-                    <button onclick="releasePayout()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl transition-all cursor-pointer text-sm">
-                        Release Escrow Payout
-                    </button>
-                    <button onclick="lookupBounty()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl transition-all cursor-pointer text-sm border border-slate-700">
-                        Query Status
-                    </button>
-                </div>
+                <button onclick="releasePayout()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3.5 rounded-xl transition-all cursor-pointer text-base shadow-lg shadow-emerald-900/30">
+                    Release Escrow Payout
+                </button>
             </div>
 
             <!-- Report Output Box -->
@@ -123,7 +130,6 @@
         let client = null;
         let account = null;
 
-        // Deployed GenLayer Contract Address
         const CONTRACT_ADDRESS = "0x41d730cD715190dE1F57D5B0f214f2FB682B35C5";
 
         window.connectWallet = function() {
@@ -149,12 +155,12 @@
         };
 
         window.switchTab = function(tab) {
-            ['create', 'submit', 'payout'].forEach(t => {
+            ['create', 'submit', 'query', 'payout'].forEach(t => {
                 document.getElementById(`view-${t}`).classList.add("hidden");
-                document.getElementById(`tab-${t}`).className = "pb-3 px-3 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all";
+                document.getElementById(`tab-${t}`).className = "pb-3 px-2.5 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all whitespace-nowrap";
             });
             document.getElementById(`view-${tab}`).classList.remove("hidden");
-            document.getElementById(`tab-${tab}`).className = "pb-3 px-3 font-semibold text-xs border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all";
+            document.getElementById(`tab-${tab}`).className = "pb-3 px-2.5 font-semibold text-xs border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all whitespace-nowrap";
         };
 
         window.createBounty = async function() {
@@ -189,7 +195,7 @@
             const url = document.getElementById("submit-url").value;
             const reportBox = document.getElementById("audit-report");
 
-            reportBox.innerHTML = "⏳ Submitting writeContract transaction for validator consensus...";
+            reportBox.innerHTML = "⏳ Submitting transaction for validator consensus...";
             try {
                 const txHash = await client.writeContract({
                     address: CONTRACT_ADDRESS,
@@ -197,7 +203,10 @@
                     args: [id, worker, url],
                 });
                 
-                reportBox.innerHTML = `⏳ Transaction broadcasted (${txHash.slice(0, 10)}...). Querying live contract state...`;
+                reportBox.innerHTML = `⏳ Transaction broadcasted (${txHash.slice(0, 10)}...). Waiting for AI consensus audit...`;
+                
+                // Allow validators time to finish scraping and voting
+                await new Promise(r => setTimeout(r, 6000));
                 
                 const details = await client.readContract({
                     address: CONTRACT_ADDRESS,
@@ -206,10 +215,30 @@
                 });
 
                 reportBox.innerHTML = `
-                    <div style="color: #00ffcc; font-weight: bold; margin-bottom: 6px;">✓ Validator Consensus Reached</div>
+                    <div style="color: #00ffcc; font-weight: bold; margin-bottom: 6px;">✓ AI Consensus Audit Complete</div>
                     <div><strong>Live State:</strong> ${details}</div>
                     <div style="font-size: 10px; color: #94a3b8; margin-top: 6px;">Contract: ${CONTRACT_ADDRESS}</div>
                     <div style="font-size: 10px; color: #94a3b8;">Tx Hash: ${txHash}</div>
+                `;
+            } catch (err) {
+                reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
+            }
+        };
+
+        window.lookupBounty = async function() {
+            if (!client) { alert("Connect wallet first!"); return; }
+            const id = document.getElementById("query-id").value;
+            const reportBox = document.getElementById("audit-report");
+            reportBox.innerHTML = "⏳ Querying contract state...";
+            try {
+                const details = await client.readContract({
+                    address: CONTRACT_ADDRESS,
+                    functionName: "get_bounty_details",
+                    args: [id],
+                });
+                reportBox.innerHTML = `
+                    <strong style="color: #60a5fa;">Live On-Chain Bounty Status:</strong><br>${details}
+                    <div style="color: #94a3b8; font-size: 10px; margin-top: 4px;">Contract: ${CONTRACT_ADDRESS}</div>
                 `;
             } catch (err) {
                 reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
@@ -233,25 +262,6 @@
                     <div style="color: #34d399; font-weight: bold; margin-bottom: 4px;">✓ Payout Released Successfully!</div>
                     <div style="color: #94a3b8; font-size: 11px;">Contract: ${CONTRACT_ADDRESS}</div>
                     <div style="color: #94a3b8; font-size: 11px;">Tx Hash: ${txHash}</div>
-                `;
-            } catch (err) {
-                reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
-            }
-        };
-
-        window.lookupBounty = async function() {
-            if (!client) { alert("Connect wallet first!"); return; }
-            const id = document.getElementById("payout-id").value;
-            const reportBox = document.getElementById("audit-report");
-            try {
-                const details = await client.readContract({
-                    address: CONTRACT_ADDRESS,
-                    functionName: "get_bounty_details",
-                    args: [id],
-                });
-                reportBox.innerHTML = `
-                    <strong style="color: #60a5fa;">Live On-Chain Bounty Details:</strong><br>${details}
-                    <div style="color: #94a3b8; font-size: 10px; margin-top: 4px;">Contract: ${CONTRACT_ADDRESS}</div>
                 `;
             } catch (err) {
                 reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
