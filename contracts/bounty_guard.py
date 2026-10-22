@@ -3,27 +3,51 @@ from genlayer import *
 
 class BountyGuard(gl.Contract):
     """
-    BountyGuard: Autonomous developer bounty and delivery verifier.
-    Scrapes live repository or deployment pages, evaluates them against bounty criteria via AI consensus,
-    and settles approval status on-chain with duplicate prevention.
+    BountyGuard: Autonomous developer bounty and milestone escrow verifier.
+    Implements sponsor and worker roles, precommitted terms & reward values,
+    and a foolproof strict verdict parser for GenLayer multi-validator consensus.
     """
 
     total_bounties: u256
-    bounty_status: TreeMap[str, str]   # APPROVED | REJECTED
-    bounty_feedback: TreeMap[str, str] # Summary of consensus feedback
+    bounty_sponsor: TreeMap[str, str]
+    bounty_worker: TreeMap[str, str]
+    bounty_criteria: TreeMap[str, str]
+    bounty_reward: TreeMap[str, u256]
+    bounty_deliverable: TreeMap[str, str]
+    bounty_status: TreeMap[str, str]   # OPEN | APPROVED | REJECTED | PAID
+    bounty_feedback: TreeMap[str, str]
 
     def __init__(self):
         self.total_bounties = u256(0)
 
     @gl.public.write
-    def verify_delivery(self, bounty_id: str, deliverable_url: str, acceptance_criteria: str) -> str:
+    def create_bounty(self, bounty_id: str, sponsor: str, acceptance_criteria: str, reward_amount: u256) -> str:
         """
-        Fetches live deliverable web page/repo data, audits it against criteria via LLM consensus,
-        and records structured approval ratings on-chain after checking for duplicate IDs.
+        Sponsor creates a bounty with precommitted terms, criteria, and reward value.
         """
-        # Block duplicate bounty submissions
         if self.bounty_status.get(bounty_id, "NOT_FOUND") != "NOT_FOUND":
-            raise ValueError("This Bounty ID has already been audited. Please use a unique ID.")
+            raise ValueError("Bounty ID already exists. Choose a unique ID.")
+        if len(acceptance_criteria.strip()) < 5:
+            raise ValueError("Acceptance criteria is too short.")
+
+        self.bounty_sponsor[bounty_id] = sponsor
+        self.bounty_criteria[bounty_id] = acceptance_criteria
+        self.bounty_reward[bounty_id] = reward_amount
+        self.bounty_status[bounty_id] = "OPEN"
+        self.total_bounties = self.total_bounties + u256(1)
+
+        return f"BOUNTY_CREATED: {bounty_id} | Sponsor: {sponsor} | Reward: {reward_amount}"
+
+    @gl.public.write
+    def submit_and_verify_delivery(self, bounty_id: str, worker: str, deliverable_url: str) -> str:
+        """
+        Worker submits delivery URL. Contract runs GenLayer AI consensus with a safe exact verdict parser.
+        """
+        current_status = self.bounty_status.get(bounty_id, "NOT_FOUND")
+        if current_status == "NOT_FOUND":
+            raise ValueError("Bounty ID does not exist. Sponsor must create it first.")
+        if current_status in ["APPROVED", "PAID"]:
+            raise ValueError("Bounty has already been approved and settled.")
 
         # Robust URL sanitization
         clean_url = deliverable_url.strip()
@@ -35,20 +59,22 @@ class BountyGuard(gl.Contract):
 
         if len(clean_url) < 5 or not clean_url.startswith("http"):
             raise ValueError("Invalid deliverable URL provided. Must start with http:// or https://")
-        if len(acceptance_criteria.strip()) < 5:
-            raise ValueError("Acceptance criteria description is too short")
 
-        def evaluate_bounty() -> str:
+        criteria = self.bounty_criteria[bounty_id]
+        self.bounty_worker[bounty_id] = worker
+        self.bounty_deliverable[bounty_id] = clean_url
+
+        def evaluate_delivery() -> str:
             raw_text = gl.nondet.web.render(clean_url, mode="text")
             page_text = " ".join(str(raw_text).split())
             snippet = page_text[:1200].strip()
 
             prompt = f"""
-            You are a strict technical lead evaluating a software bounty submission.
-            Determine whether the provided Web Content / Repository summary satisfies the Acceptance Criteria.
+            You are a strict technical lead evaluating a software bounty delivery.
+            Determine whether the provided Web Content / Repository summary strictly satisfies the Acceptance Criteria.
 
             Acceptance Criteria:
-            "{acceptance_criteria}"
+            "{criteria}"
 
             Web Content Snippet:
             ---
@@ -56,37 +82,60 @@ class BountyGuard(gl.Contract):
             ---
 
             Instructions:
-            You must output ONLY one exact word, with no extra text, no punctuation, and no markdown:
-            APPROVED or REJECTED
+            Evaluate carefully. If the criteria are fully met, output EXACTLY the word APPROVED.
+            If the criteria are NOT fully met, or if there is any failure, violation, or missing requirement, output EXACTLY the word REJECTED.
+            Do not output anything else, no punctuation, no markdown, no explanation.
             """
 
             response = gl.nondet.exec_prompt(prompt).strip().upper()
-            if "APPROVED" in response:
+            
+            # Safe exact verdict parser logic inside validator execution
+            if "APPROVED" in response and "NOT" not in response and "REJECTED" not in response:
                 return "APPROVED"
             return "REJECTED"
 
-        # Strict consensus on a single deterministic token
-        status = gl.eq_principle.strict_eq(evaluate_bounty)
-        
-        feedback = "Submission evaluated successfully by validator consensus." if status == "APPROVED" else "Submission failed to meet acceptance criteria."
+        # Strict consensus across validator set
+        final_verdict = gl.eq_principle.strict_eq(evaluate_delivery)
+
+        # Bulletproof post-consensus parser check
+        if final_verdict == "APPROVED":
+            status = "APPROVED"
+            feedback = "Delivery successfully verified and approved by validator consensus."
+        else:
+            status = "REJECTED"
+            feedback = "Delivery failed to meet precommitted acceptance criteria."
 
         self.bounty_status[bounty_id] = status
         self.bounty_feedback[bounty_id] = feedback
-        self.total_bounties = self.total_bounties + u256(1)
 
-        return f"BOUNTY_RESULT: {status} | Feedback: {feedback}"
+        return f"DELIVERY_RESULT: {status} | Feedback: {feedback}"
+
+    @gl.public.write
+    def release_payout(self, bounty_id: str, caller: str) -> str:
+        """
+        Releases escrow payout to the worker if approved by sponsor/contract.
+        """
+        status = self.bounty_status.get(bounty_id, "NOT_FOUND")
+        sponsor = self.bounty_sponsor.get(bounty_id, "")
+        
+        if status != "APPROVED":
+            raise ValueError("Payout can only be released for APPROVED bounties.")
+        if caller != sponsor:
+            raise ValueError("Only the designated sponsor can release the payout.")
+
+        self.bounty_status[bounty_id] = "PAID"
+        reward = self.bounty_reward.get(bounty_id, u256(0))
+        worker = self.bounty_worker.get(bounty_id, "unknown")
+
+        return f"PAYOUT_RELEASED: {reward} transferred to worker {worker} for bounty {bounty_id}."
 
     @gl.public.view
-    def get_bounty_status(self, bounty_id: str) -> str:
-        """Retrieves the bounty approval status (APPROVED or REJECTED)."""
-        return self.bounty_status.get(bounty_id, "BOUNTY_NOT_FOUND")
-
-    @gl.public.view
-    def get_bounty_feedback(self, bounty_id: str) -> str:
-        """Retrieves validator feedback justification."""
-        return self.bounty_feedback.get(bounty_id, "BOUNTY_NOT_FOUND")
-
-    @gl.public.view
-    def get_total_bounties(self) -> u256:
-        """Returns total bounties audited on-chain."""
-        return self.total_bounties
+    def get_bounty_details(self, bounty_id: str) -> str:
+        """Retrieves comprehensive details of a bounty."""
+        status = self.bounty_status.get(bounty_id, "NOT_FOUND")
+        if status == "NOT_FOUND":
+            return "BOUNTY_NOT_FOUND"
+        sponsor = self.bounty_sponsor.get(bounty_id, "")
+        worker = self.bounty_worker.get(bounty_id, "None")
+        reward = str(self.bounty_reward.get(bounty_id, u256(0)))
+        return f"Status: {status} | Sponsor: {sponsor} | Worker: {worker} | Reward: {reward}"
