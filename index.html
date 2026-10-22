@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BountyGuard | Autonomous Deliverable Verifier</title>
+    <title>BountyGuard | Autonomous Deliverable & Escrow Verifier</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500 selection:text-slate-950">
 
-    <!-- Top Navigation Bar -->
+    <!-- Header -->
     <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-3">
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-slate-950 shadow-lg shadow-cyan-500/20">BG</div>
             <div>
                 <h1 class="font-bold text-lg tracking-tight text-cyan-400">BountyGuard</h1>
-                <p class="text-xs text-slate-400">GenLayer Autonomous Verification</p>
+                <p class="text-xs text-slate-400">GenLayer Sponsor & Worker Escrow</p>
             </div>
         </div>
-
-        <!-- Wallet Connect / Status Widget -->
         <div id="wallet-section">
             <button onclick="connectWallet()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition-all shadow-lg shadow-cyan-900/40 cursor-pointer">
                 Connect Wallet
@@ -30,53 +28,85 @@
     <main class="flex-grow flex items-center justify-center p-6">
         <div class="max-w-2xl w-full bg-slate-900/80 border border-slate-800/80 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
             
-            <!-- Tabs -->
-            <div class="flex border-b border-slate-800 mb-6">
-                <button onclick="switchTab('submit')" id="tab-submit" class="pb-3 px-4 font-semibold text-sm border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all">Submit & Audit</button>
-                <button onclick="switchTab('lookup')" id="tab-lookup" class="pb-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all">Lookup Bounty ID</button>
+            <!-- Navigation Tabs -->
+            <div class="flex border-b border-slate-800 mb-6 space-x-2">
+                <button onclick="switchTab('create')" id="tab-create" class="pb-3 px-3 font-semibold text-xs border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all">1. Create Bounty</button>
+                <button onclick="switchTab('submit')" id="tab-submit" class="pb-3 px-3 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all">2. Submit Delivery</button>
+                <button onclick="switchTab('payout')" id="tab-payout" class="pb-3 px-3 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all">3. Release Payout</button>
             </div>
 
-            <!-- View 1: Submit & Audit -->
-            <div id="view-submit" class="space-y-4">
+            <!-- Tab 1: Create Bounty (Sponsor Role) -->
+            <div id="view-create" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
-                    <input id="bounty-id" type="text" value="bounty_001" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all text-slate-200">
+                    <input id="create-id" type="text" value="bounty_001" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Sponsor Handle / Address</label>
+                    <input id="create-sponsor" type="text" value="SponsorDAO" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Precommitted Acceptance Criteria</label>
+                    <textarea id="create-criteria" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">The page must state that it is for use in illustrative examples in documents.</textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Reward Amount (Tokens)</label>
+                    <input id="create-reward" type="number" value="500" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+                <button onclick="createBounty()" id="btn-create" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-cyan-900/50 cursor-pointer text-base">
+                    Create Sponsor Bounty
+                </button>
+            </div>
+
+            <!-- Tab 2: Submit Delivery (Worker Role) -->
+            <div id="view-submit" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
+                    <input id="submit-id" type="text" value="bounty_001" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Worker Handle / Address</label>
+                    <input id="submit-worker" type="text" value="DevBuilder" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Deliverable URL (GitHub / Demo)</label>
-                    <input id="deliverable-url" type="text" value="https://example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all text-slate-200">
+                    <input id="submit-url" type="text" value="https://example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Acceptance Criteria</label>
-                    <textarea id="criteria" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all text-slate-200">The page must state that it is for use in illustrative examples in documents.</textarea>
-                </div>
-                
-                <button id="bounty-btn" onclick="runBountyAudit()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-cyan-900/50 cursor-pointer text-base">
-                    Verify Bounty Delivery
+                <button onclick="submitDelivery()" id="btn-submit" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-slate-950 font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-cyan-900/50 cursor-pointer text-base">
+                    Submit & Verify Delivery via AI Consensus
                 </button>
             </div>
 
-            <!-- View 2: Lookup Bounty -->
-            <div id="view-lookup" class="space-y-4 hidden">
+            <!-- Tab 3: Release Payout & Lookup -->
+            <div id="view-payout" class="space-y-4 hidden">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Search Bounty ID</label>
-                    <input id="lookup-id" type="text" value="bounty_001" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-all text-slate-200">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
+                    <input id="payout-id" type="text" value="bounty_001" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
                 </div>
-                <button onclick="lookupBounty()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3.5 rounded-xl transition-all cursor-pointer text-base border border-slate-700">
-                    Query On-Chain Status
-                </button>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Caller Sponsor Handle</label>
+                    <input id="payout-caller" type="text" value="SponsorDAO" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="releasePayout()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl transition-all cursor-pointer text-sm">
+                        Release Escrow Payout
+                    </button>
+                    <button onclick="lookupBounty()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl transition-all cursor-pointer text-sm border border-slate-700">
+                        Query Status
+                    </button>
+                </div>
             </div>
 
-            <!-- Result Report Box -->
+            <!-- Report Output Box -->
             <div id="audit-report" class="mt-6 p-5 bg-slate-950 border border-slate-800/80 rounded-xl text-xs font-mono text-slate-300 min-h-[150px] flex flex-col justify-center overflow-x-auto break-all">
-                <span class="text-slate-500 text-center">Connect wallet and run an audit or lookup to view on-chain validator consensus reports.</span>
+                <span class="text-slate-500 text-center">Connect wallet and execute workflow steps above.</span>
             </div>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-900">
-        BountyGuard Protocol &bull; Powered by GenLayer StudioNet Consensus
+        BountyGuard Protocol &bull; GenLayer StudioNet Consensus
     </footer>
 
     <!-- Web3 Integration Script -->
@@ -87,150 +117,126 @@
         let client = null;
         let account = null;
 
-        const CONTRACT_ADDRESS = "0xA7e39FEe053d0Ea436cf8aC3fefbC8b681640f0e";
+        const CONTRACT_ADDRESS = "0x41d730cD715190dE1F57D5B0f214f2FB682B35C5";
 
         window.connectWallet = function() {
             try {
                 account = createAccount();
-                client = createClient({
-                    chain: studionet,
-                    account: account,
-                });
-
+                client = createClient({ chain: studionet, account: account });
                 const shortAddr = account.address.slice(0, 6) + "..." + account.address.slice(-4);
-                
                 document.getElementById("wallet-section").innerHTML = `
                     <div class="flex items-center gap-3 bg-slate-800/80 border border-slate-700 px-3.5 py-2 rounded-xl">
                         <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
                         <span class="text-xs font-mono text-slate-200">${shortAddr}</span>
-                        <button onclick="disconnectWallet()" class="text-slate-400 hover:text-red-400 text-xs font-bold ml-2 cursor-pointer transition-colors" title="Disconnect">✕</button>
+                        <button onclick="disconnectWallet()" class="text-slate-400 hover:text-red-400 text-xs font-bold ml-2 cursor-pointer">✕</button>
                     </div>
                 `;
             } catch (err) {
-                alert("Failed to connect account: " + err.message);
+                alert("Connection failed: " + err.message);
             }
         };
 
         window.disconnectWallet = function() {
-            account = null;
-            client = null;
-            document.getElementById("wallet-section").innerHTML = `
-                <button onclick="connectWallet()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition-all shadow-lg shadow-cyan-900/40 cursor-pointer">
-                    Connect Wallet
-                </button>
-            `;
-            document.getElementById("audit-report").innerHTML = `<span class="text-slate-500 text-center">Wallet disconnected.</span>`;
+            account = null; client = null;
+            document.getElementById("wallet-section").innerHTML = `<button onclick="connectWallet()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm shadow-lg">Connect Wallet</button>`;
         };
 
         window.switchTab = function(tab) {
-            const submitView = document.getElementById("view-submit");
-            const lookupView = document.getElementById("view-lookup");
-            const tabSubmit = document.getElementById("tab-submit");
-            const tabLookup = document.getElementById("tab-lookup");
-
-            if (tab === 'submit') {
-                submitView.classList.remove("hidden");
-                lookupView.classList.add("hidden");
-                tabSubmit.className = "pb-3 px-4 font-semibold text-sm border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all";
-                tabLookup.className = "pb-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all";
-            } else {
-                lookupView.classList.remove("hidden");
-                submitView.classList.add("hidden");
-                tabLookup.className = "pb-3 px-4 font-semibold text-sm border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all";
-                tabSubmit.className = "pb-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all";
-            }
+            ['create', 'submit', 'payout'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add("hidden");
+                document.getElementById(`tab-${t}`).className = "pb-3 px-3 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all";
+            });
+            document.getElementById(`view-${tab}`).classList.remove("hidden");
+            document.getElementById(`tab-${tab}`).className = "pb-3 px-3 font-semibold text-xs border-b-2 border-cyan-500 text-cyan-400 cursor-pointer transition-all";
         };
 
-        window.runBountyAudit = async function() {
-            if (!client || !account) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-
-            const bountyId = document.getElementById("bounty-id").value;
-            const deliverableUrl = document.getElementById("deliverable-url").value;
-            const criteria = document.getElementById("criteria").value;
+        window.createBounty = async function() {
+            if (!client) { alert("Connect wallet first!"); return; }
+            const id = document.getElementById("create-id").value;
+            const sponsor = document.getElementById("create-sponsor").value;
+            const criteria = document.getElementById("create-criteria").value;
+            const reward = BigInt(document.getElementById("create-reward").value);
             const reportBox = document.getElementById("audit-report");
-            const btn = document.getElementById("bounty-btn");
 
-            btn.disabled = true;
-            btn.classList.add("opacity-50", "cursor-not-allowed");
-            btn.innerText = "⏳ Running Validator Consensus...";
-
-            reportBox.innerHTML = "⏳ Submitting delivery data to GenLayer validators...";
-
+            reportBox.innerHTML = "⏳ Creating sponsor bounty on-chain...";
             try {
                 const txHash = await client.writeContract({
                     address: CONTRACT_ADDRESS,
-                    functionName: "verify_delivery",
-                    args: [bountyId, deliverableUrl, criteria],
+                    functionName: "create_bounty",
+                    args: [id, sponsor, criteria, reward],
                 });
+                reportBox.innerHTML = `<span style="color: #34d399; font-weight: bold;">✓ Sponsor Bounty Created Successfully!</span><br>Tx Hash: ${txHash}`;
+            } catch (err) {
+                reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
+            }
+        };
 
+        window.submitDelivery = async function() {
+            if (!client) { alert("Connect wallet first!"); return; }
+            const id = document.getElementById("submit-id").value;
+            const worker = document.getElementById("submit-worker").value;
+            const url = document.getElementById("submit-url").value;
+            const reportBox = document.getElementById("audit-report");
+
+            reportBox.innerHTML = "⏳ Submitting delivery to GenLayer validators for AI consensus audit...";
+            try {
+                const txHash = await client.writeContract({
+                    address: CONTRACT_ADDRESS,
+                    functionName: "submit_and_verify_delivery",
+                    args: [id, worker, url],
+                });
                 reportBox.innerHTML = `⏳ Transaction submitted (${txHash.slice(0, 10)}...). Waiting for validator consensus...`;
-
-                await new Promise(resolve => setTimeout(resolve, 5000));
-
-                const status = await client.readContract({
+                
+                await new Promise(r => setTimeout(r, 6000));
+                
+                const details = await client.readContract({
                     address: CONTRACT_ADDRESS,
-                    functionName: "get_bounty_status",
-                    args: [bountyId],
-                });
-
-                const feedback = await client.readContract({
-                    address: CONTRACT_ADDRESS,
-                    functionName: "get_bounty_feedback",
-                    args: [bountyId],
+                    functionName: "get_bounty_details",
+                    args: [id],
                 });
 
                 reportBox.innerHTML = `
-                    <div style="color: #00ffcc; font-weight: bold; margin-bottom: 8px; font-size: 13px;">✓ ACCEPTED Across GenLayer Validator Set</div>
-                    <div style="margin-bottom: 4px;"><strong>Bounty ID:</strong> ${bountyId}</div>
-                    <div style="margin-bottom: 4px;"><strong>Deliverable:</strong> ${deliverableUrl}</div>
-                    <div style="margin-bottom: 4px;"><strong>Audit Status:</strong> <span style="color: ${status === 'APPROVED' ? '#34d399' : '#f87171'}; font-weight: bold;">${status}</span></div>
-                    <div style="margin-bottom: 6px;"><strong>Feedback:</strong> ${feedback}</div>
-                    <div style="font-size: 11px; color: #94a3b8; word-break: break-all; margin-top: 6px; border-top: 1px solid #1e293b; padding-top: 6px;"><strong>Tx Hash:</strong> ${txHash}</div>
+                    <div style="color: #00ffcc; font-weight: bold; margin-bottom: 6px;">✓ Validator Consensus Reached</div>
+                    <div><strong>Details:</strong> ${details}</div>
+                    <div style="font-size: 10px; color: #94a3b8; margin-top: 6px;">Tx: ${txHash}</div>
                 `;
-            } catch (error) {
-                reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${error.message}</span>`;
-            } finally {
-                btn.disabled = false;
-                btn.classList.remove("opacity-50", "cursor-not-allowed");
-                btn.innerText = "Verify Bounty Delivery";
+            } catch (err) {
+                reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
+            }
+        };
+
+        window.releasePayout = async function() {
+            if (!client) { alert("Connect wallet first!"); return; }
+            const id = document.getElementById("payout-id").value;
+            const caller = document.getElementById("payout-caller").value;
+            const reportBox = document.getElementById("audit-report");
+
+            reportBox.innerHTML = "⏳ Releasing escrow payout...";
+            try {
+                const txHash = await client.writeContract({
+                    address: CONTRACT_ADDRESS,
+                    functionName: "release_payout",
+                    args: [id, caller],
+                });
+                reportBox.innerHTML = `<span style="color: #34d399; font-weight: bold;">✓ Payout Released Successfully!</span><br>Tx Hash: ${txHash}`;
+            } catch (err) {
+                reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
             }
         };
 
         window.lookupBounty = async function() {
-            if (!client) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-
-            const lookupId = document.getElementById("lookup-id").value;
+            if (!client) { alert("Connect wallet first!"); return; }
+            const id = document.getElementById("payout-id").value;
             const reportBox = document.getElementById("audit-report");
-
-            reportBox.innerHTML = "⏳ Querying blockchain state...";
-
             try {
-                const status = await client.readContract({
+                const details = await client.readContract({
                     address: CONTRACT_ADDRESS,
-                    functionName: "get_bounty_status",
-                    args: [lookupId],
+                    functionName: "get_bounty_details",
+                    args: [id],
                 });
-
-                const feedback = await client.readContract({
-                    address: CONTRACT_ADDRESS,
-                    functionName: "get_bounty_feedback",
-                    args: [lookupId],
-                });
-
-                reportBox.innerHTML = `
-                    <div style="color: #60a5fa; font-weight: bold; margin-bottom: 8px; font-size: 13px;">🔍 On-Chain Query Result</div>
-                    <div style="margin-bottom: 4px;"><strong>Bounty ID:</strong> ${lookupId}</div>
-                    <div style="margin-bottom: 4px;"><strong>Status:</strong> <span style="color: ${status === 'APPROVED' ? '#34d399' : '#f87171'}; font-weight: bold;">${status}</span></div>
-                    <div style="margin-bottom: 6px;"><strong>Feedback:</strong> ${feedback}</div>
-                `;
-            } catch (error) {
-                reportBox.innerHTML = `<span style="color: #f87171;">❌ Lookup Error: ${error.message}</span>`;
+                reportBox.innerHTML = `<strong style="color: #60a5fa;">Bounty Details:</strong><br>${details}`;
+            } catch (err) {
+                reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
             }
         };
     </script>
