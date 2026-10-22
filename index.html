@@ -8,32 +8,36 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500 selection:text-slate-950">
 
-    <!-- Header with Dynamic Contract Switcher -->
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex flex-wrap justify-between items-center gap-4">
-        <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-slate-950 shadow-lg shadow-cyan-500/20">BG</div>
-            <div>
-                <h1 class="font-bold text-lg tracking-tight text-cyan-400">BountyGuard</h1>
-                <p class="text-xs text-slate-400">GenLayer Sponsor & Worker Escrow</p>
+    <!-- Header Navigation Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            
+            <!-- Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-slate-950 shadow-lg shadow-cyan-500/20">BG</div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight text-cyan-400">BountyGuard</h1>
+                    <p class="text-xs text-slate-400">GenLayer Sponsor & Worker Escrow</p>
+                </div>
             </div>
-        </div>
 
-        <!-- Dynamic Contract Address Configurator -->
-        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl">
-            <span class="text-xs font-semibold text-slate-400">Contract:</span>
-            <input id="contract-address-input" type="text" placeholder="0x..." class="bg-transparent border-none text-xs font-mono text-cyan-400 w-52 focus:outline-none">
-            <button onclick="updateContractAddress()" class="bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 text-xs font-bold px-2 py-1 rounded-md transition-colors cursor-pointer">Set</button>
-        </div>
+            <!-- Active Contract Configurator -->
+            <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contract:</span>
+                <input id="contract-address-input" type="text" placeholder="0x..." class="bg-transparent border-none text-xs font-mono text-cyan-400 w-48 sm:w-64 focus:outline-none">
+                <button onclick="updateContractAddress()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer">Set</button>
+            </div>
 
-        <!-- Wallet Section -->
-        <div id="wallet-section">
-            <button onclick="connectWallet()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition-all shadow-lg shadow-cyan-900/40 cursor-pointer">
-                Connect Wallet
-            </button>
+            <!-- Wallet Connection -->
+            <div id="wallet-section">
+                <button onclick="connectWallet()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition-all shadow-lg shadow-cyan-900/40 cursor-pointer">
+                    Connect Wallet
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Main Container -->
+    <!-- Main Content Container -->
     <main class="flex-grow flex items-center justify-center p-6">
         <div class="max-w-2xl w-full bg-slate-900/80 border border-slate-800/80 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
             
@@ -44,7 +48,7 @@
                 <button onclick="switchTab('payout')" id="tab-payout" class="pb-3 px-3 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all">3. Release Payout</button>
             </div>
 
-            <!-- Tab 1: Create Bounty (Sponsor Role) -->
+            <!-- Tab 1: Create Bounty -->
             <div id="view-create" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
@@ -67,7 +71,7 @@
                 </button>
             </div>
 
-            <!-- Tab 2: Submit Delivery (Worker Role) -->
+            <!-- Tab 2: Submit Delivery -->
             <div id="view-submit" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
@@ -86,7 +90,7 @@
                 </button>
             </div>
 
-            <!-- Tab 3: Release Payout & Lookup -->
+            <!-- Tab 3: Release Payout -->
             <div id="view-payout" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
@@ -107,8 +111,8 @@
             </div>
 
             <!-- Report Output Box -->
-            <div id="audit-report" class="mt-6 p-5 bg-slate-950 border border-slate-800/80 rounded-xl text-xs font-mono text-slate-300 min-h-[150px] flex flex-col justify-center overflow-x-auto break-all">
-                <span class="text-slate-500 text-center">Connect wallet, set your active contract address, and execute workflow steps above.</span>
+            <div id="audit-report" class="mt-6 p-5 bg-slate-950 border border-slate-800/80 rounded-xl text-xs font-mono text-slate-300 min-h-[140px] flex flex-col justify-center overflow-x-auto break-all">
+                <span class="text-slate-500 text-center">Connect wallet, check active contract address, and execute workflow steps above.</span>
             </div>
         </div>
     </main>
@@ -126,8 +130,10 @@
         let client = null;
         let account = null;
 
-        // Dynamic Contract Address Management
-        let CONTRACT_ADDRESS = localStorage.getItem("bounty_guard_contract") || "0xYourDefaultContractAddressHere";
+        // Default contract address from GenStudio
+        const DEFAULT_CONTRACT = "0x41d730cD715190dE1F57D5B0f214f2FB682B35C5";
+        let CONTRACT_ADDRESS = localStorage.getItem("bounty_guard_contract") || DEFAULT_CONTRACT;
+
         document.getElementById("contract-address-input").value = CONTRACT_ADDRESS;
 
         window.updateContractAddress = function() {
@@ -138,7 +144,7 @@
             }
             CONTRACT_ADDRESS = addr;
             localStorage.setItem("bounty_guard_contract", addr);
-            alert("Active contract address updated to: " + addr);
+            alert("Active contract address set to: " + addr);
         };
 
         window.connectWallet = function() {
@@ -180,14 +186,18 @@
             const reward = BigInt(document.getElementById("create-reward").value);
             const reportBox = document.getElementById("audit-report");
 
-            reportBox.innerHTML = "⏳ Creating sponsor bounty on-chain...";
+            reportBox.innerHTML = `⏳ Executing on contract (${CONTRACT_ADDRESS.slice(0,8)}...)...`;
             try {
                 const txHash = await client.writeContract({
                     address: CONTRACT_ADDRESS,
                     functionName: "create_bounty",
                     args: [id, sponsor, criteria, reward],
                 });
-                reportBox.innerHTML = `<span style="color: #34d399; font-weight: bold;">✓ Sponsor Bounty Created Successfully!</span><br>Tx Hash: ${txHash}`;
+                reportBox.innerHTML = `
+                    <div style="color: #34d399; font-weight: bold; margin-bottom: 4px;">✓ Sponsor Bounty Created Successfully!</div>
+                    <div style="color: #94a3b8; font-size: 11px;">Target Contract: ${CONTRACT_ADDRESS}</div>
+                    <div style="color: #94a3b8; font-size: 11px;">Tx Hash: ${txHash}</div>
+                `;
             } catch (err) {
                 reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
             }
@@ -220,7 +230,8 @@
                 reportBox.innerHTML = `
                     <div style="color: #00ffcc; font-weight: bold; margin-bottom: 6px;">✓ Validator Consensus Reached</div>
                     <div><strong>Details:</strong> ${details}</div>
-                    <div style="font-size: 10px; color: #94a3b8; margin-top: 6px;">Tx: ${txHash}</div>
+                    <div style="font-size: 10px; color: #94a3b8; margin-top: 6px;">Contract: ${CONTRACT_ADDRESS}</div>
+                    <div style="font-size: 10px; color: #94a3b8;">Tx: ${txHash}</div>
                 `;
             } catch (err) {
                 reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
@@ -240,7 +251,11 @@
                     functionName: "release_payout",
                     args: [id, caller],
                 });
-                reportBox.innerHTML = `<span style="color: #34d399; font-weight: bold;">✓ Payout Released Successfully!</span><br>Tx Hash: ${txHash}`;
+                reportBox.innerHTML = `
+                    <div style="color: #34d399; font-weight: bold; margin-bottom: 4px;">✓ Payout Released Successfully!</div>
+                    <div style="color: #94a3b8; font-size: 11px;">Contract: ${CONTRACT_ADDRESS}</div>
+                    <div style="color: #94a3b8; font-size: 11px;">Tx Hash: ${txHash}</div>
+                `;
             } catch (err) {
                 reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
             }
@@ -256,7 +271,9 @@
                     functionName: "get_bounty_details",
                     args: [id],
                 });
-                reportBox.innerHTML = `<strong style="color: #60a5fa;">Bounty Details:</strong><br>${details}`;
+                reportBox.innerHTML = `
+                    <strong style="color: #60a5fa;">Bounty Details (Contract: ${CONTRACT_ADDRESS.slice(0,8)}...):</strong><br>${details}
+                `;
             } catch (err) {
                 reportBox.innerHTML = `<span style="color: #f87171;">❌ Error: ${err.message}</span>`;
             }
