@@ -24,7 +24,7 @@
             <!-- Active Contract Configurator -->
             <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl">
                 <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contract:</span>
-                <input id="contract-address-input" type="text" placeholder="0x..." class="bg-transparent border-none text-xs font-mono text-cyan-400 w-48 sm:w-64 focus:outline-none">
+                <input id="contract-address-input" type="text" placeholder="enter your contract address" class="bg-transparent border-none text-xs font-mono text-cyan-400 w-48 sm:w-64 focus:outline-none">
                 <button onclick="updateContractAddress()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer">Set</button>
             </div>
 
@@ -112,7 +112,7 @@
 
             <!-- Report Output Box -->
             <div id="audit-report" class="mt-6 p-5 bg-slate-950 border border-slate-800/80 rounded-xl text-xs font-mono text-slate-300 min-h-[140px] flex flex-col justify-center overflow-x-auto break-all">
-                <span class="text-slate-500 text-center">Connect wallet, check active contract address, and execute workflow steps above.</span>
+                <span class="text-slate-500 text-center">Connect wallet, enter your contract address, and execute workflow steps above.</span>
             </div>
         </div>
     </main>
@@ -130,11 +130,11 @@
         let client = null;
         let account = null;
 
-        // Default contract address from GenStudio
-        const DEFAULT_CONTRACT = "0x41d730cD715190dE1F57D5B0f214f2FB682B35C5";
+        // Enter your contract address here
+        const DEFAULT_CONTRACT = "enter your contract address";
         let CONTRACT_ADDRESS = localStorage.getItem("bounty_guard_contract") || DEFAULT_CONTRACT;
 
-        document.getElementById("contract-address-input").value = CONTRACT_ADDRESS;
+        document.getElementById("contract-address-input").value = CONTRACT_ADDRESS === "enter your contract address" ? "" : CONTRACT_ADDRESS;
 
         window.updateContractAddress = function() {
             const addr = document.getElementById("contract-address-input").value.trim();
@@ -180,6 +180,10 @@
 
         window.createBounty = async function() {
             if (!client) { alert("Connect wallet first!"); return; }
+            if (CONTRACT_ADDRESS === "enter your contract address" || !CONTRACT_ADDRESS.startsWith("0x")) {
+                alert("Please enter a valid contract address in the top header bar first!");
+                return;
+            }
             const id = document.getElementById("create-id").value;
             const sponsor = document.getElementById("create-sponsor").value;
             const criteria = document.getElementById("create-criteria").value;
@@ -205,6 +209,10 @@
 
         window.submitDelivery = async function() {
             if (!client) { alert("Connect wallet first!"); return; }
+            if (CONTRACT_ADDRESS === "enter your contract address" || !CONTRACT_ADDRESS.startsWith("0x")) {
+                alert("Please enter a valid contract address in the top header bar first!");
+                return;
+            }
             const id = document.getElementById("submit-id").value;
             const worker = document.getElementById("submit-worker").value;
             const url = document.getElementById("submit-url").value;
@@ -240,6 +248,10 @@
 
         window.releasePayout = async function() {
             if (!client) { alert("Connect wallet first!"); return; }
+            if (CONTRACT_ADDRESS === "enter your contract address" || !CONTRACT_ADDRESS.startsWith("0x")) {
+                alert("Please enter a valid contract address in the top header bar first!");
+                return;
+            }
             const id = document.getElementById("payout-id").value;
             const caller = document.getElementById("payout-caller").value;
             const reportBox = document.getElementById("audit-report");
@@ -263,6 +275,10 @@
 
         window.lookupBounty = async function() {
             if (!client) { alert("Connect wallet first!"); return; }
+            if (CONTRACT_ADDRESS === "enter your contract address" || !CONTRACT_ADDRESS.startsWith("0x")) {
+                alert("Please enter a valid contract address in the top header bar first!");
+                return;
+            }
             const id = document.getElementById("payout-id").value;
             const reportBox = document.getElementById("audit-report");
             try {
