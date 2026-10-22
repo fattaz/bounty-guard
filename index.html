@@ -10,7 +10,7 @@
 
     <!-- Header Navigation Bar -->
     <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
-        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
             
             <!-- Brand -->
             <div class="flex items-center space-x-3">
@@ -19,13 +19,6 @@
                     <h1 class="font-bold text-lg tracking-tight text-cyan-400">BountyGuard</h1>
                     <p class="text-xs text-slate-400">GenLayer Sponsor & Worker Escrow</p>
                 </div>
-            </div>
-
-            <!-- Active Contract Configurator -->
-            <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contract:</span>
-                <input id="contract-address-input" type="text" placeholder="0x..." class="bg-transparent border-none text-xs font-mono text-cyan-400 w-48 sm:w-64 focus:outline-none">
-                <button onclick="updateContractAddress()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer">Set</button>
             </div>
 
             <!-- Wallet Connection -->
@@ -38,16 +31,7 @@
     </header>
 
     <!-- Main Content Container -->
-    <main class="flex-grow flex flex-col items-center justify-center p-6">
-        
-        <!-- Floating Guidance Banner -->
-        <div class="max-w-2xl w-full mb-6 bg-cyan-950/40 border border-cyan-800/60 rounded-2xl p-4 shadow-xl backdrop-blur-xl flex items-start gap-3">
-            <div class="text-cyan-400 text-lg font-bold">💡</div>
-            <div class="text-xs text-slate-300 leading-relaxed">
-                <strong class="text-cyan-300">Contract Mode:</strong> The DApp is pre-loaded with a default working contract for instant testing. If you want to customize terms and conditions to your own preference, deploy a fresh contract in GenStudio and enter your new contract address in the top header bar!
-            </div>
-        </div>
-
+    <main class="flex-grow flex items-center justify-center p-6">
         <div class="max-w-2xl w-full bg-slate-900/80 border border-slate-800/80 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
             
             <!-- Navigation Tabs -->
@@ -57,7 +41,7 @@
                 <button onclick="switchTab('payout')" id="tab-payout" class="pb-3 px-3 font-semibold text-xs border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer transition-all">3. Release Payout</button>
             </div>
 
-            <!-- Tab 1: Create Bounty -->
+            <!-- Tab 1: Create Bounty (Sponsor Role) -->
             <div id="view-create" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
@@ -80,7 +64,7 @@
                 </button>
             </div>
 
-            <!-- Tab 2: Submit Delivery -->
+            <!-- Tab 2: Submit Delivery (Worker Role) -->
             <div id="view-submit" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
@@ -99,7 +83,7 @@
                 </button>
             </div>
 
-            <!-- Tab 3: Release Payout -->
+            <!-- Tab 3: Release Payout & Lookup -->
             <div id="view-payout" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Bounty ID</label>
@@ -121,7 +105,7 @@
 
             <!-- Report Output Box -->
             <div id="audit-report" class="mt-6 p-5 bg-slate-950 border border-slate-800/80 rounded-xl text-xs font-mono text-slate-300 min-h-[140px] flex flex-col justify-center overflow-x-auto break-all">
-                <span class="text-slate-500 text-center">Connect wallet, check active contract address, and execute workflow steps above.</span>
+                <span class="text-slate-500 text-center">Connect wallet and execute workflow steps above.</span>
             </div>
         </div>
     </main>
@@ -139,22 +123,8 @@
         let client = null;
         let account = null;
 
-        // Default working contract address
-        const DEFAULT_CONTRACT = "0x41d730cD715190dE1F57D5B0f214f2FB682B35C5";
-        let CONTRACT_ADDRESS = localStorage.getItem("bounty_guard_contract") || DEFAULT_CONTRACT;
-
-        document.getElementById("contract-address-input").value = CONTRACT_ADDRESS;
-
-        window.updateContractAddress = function() {
-            const addr = document.getElementById("contract-address-input").value.trim();
-            if (!addr.startsWith("0x") || addr.length < 10) {
-                alert("Please enter a valid GenLayer contract address starting with 0x");
-                return;
-            }
-            CONTRACT_ADDRESS = addr;
-            localStorage.setItem("bounty_guard_contract", addr);
-            alert("Active contract address set to: " + addr);
-        };
+        // Deployed GenLayer Contract Address
+        const CONTRACT_ADDRESS = "0x41d730cD715190dE1F57D5B0f214f2FB682B35C5";
 
         window.connectWallet = function() {
             try {
@@ -204,7 +174,7 @@
                 });
                 reportBox.innerHTML = `
                     <div style="color: #34d399; font-weight: bold; margin-bottom: 4px;">✓ Sponsor Bounty Created Successfully!</div>
-                    <div style="color: #94a3b8; font-size: 11px;">Target Contract: ${CONTRACT_ADDRESS}</div>
+                    <div style="color: #94a3b8; font-size: 11px;">Contract: ${CONTRACT_ADDRESS}</div>
                     <div style="color: #94a3b8; font-size: 11px;">Tx Hash: ${txHash}</div>
                 `;
             } catch (err) {
@@ -238,7 +208,7 @@
                 reportBox.innerHTML = `
                     <div style="color: #00ffcc; font-weight: bold; margin-bottom: 6px;">✓ Validator Consensus Reached</div>
                     <div><strong>Live State:</strong> ${details}</div>
-                    <div style="font-size: 10px; color: #94a3b8; margin-top: 6px;">Target Contract: ${CONTRACT_ADDRESS}</div>
+                    <div style="font-size: 10px; color: #94a3b8; margin-top: 6px;">Contract: ${CONTRACT_ADDRESS}</div>
                     <div style="font-size: 10px; color: #94a3b8;">Tx Hash: ${txHash}</div>
                 `;
             } catch (err) {
@@ -261,7 +231,7 @@
                 });
                 reportBox.innerHTML = `
                     <div style="color: #34d399; font-weight: bold; margin-bottom: 4px;">✓ Payout Released Successfully!</div>
-                    <div style="color: #94a3b8; font-size: 11px;">Target Contract: ${CONTRACT_ADDRESS}</div>
+                    <div style="color: #94a3b8; font-size: 11px;">Contract: ${CONTRACT_ADDRESS}</div>
                     <div style="color: #94a3b8; font-size: 11px;">Tx Hash: ${txHash}</div>
                 `;
             } catch (err) {
