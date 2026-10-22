@@ -11,7 +11,7 @@ The DApp features **full live GenLayer integration** using `genlayer-js` (`studi
 
 ## 🚀 Key Features & UX
 * **Live On-Chain Integration:** Completely free of mock or simulated timeouts; every action executes real `client.writeContract()` and `client.readContract()` calls.
-* **4-Step Escrow Workflow:**
+* Escrow Workflow:**
   1. **Create Bounty:** Precommit custom acceptance criteria and token reward values on-chain.
   2. **Submit Delivery:** Submit deliverable URLs for automated multi-validator AI consensus auditing.
   3. **Query Status:** Check real-time live on-chain status (`OPEN`, `APPROVED`, `REJECTED`, or `PAID`).
